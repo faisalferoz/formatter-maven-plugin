@@ -14,10 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.revelc.code.formatter.java;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+
+import net.revelc.code.formatter.AbstractCacheableFormatter;
+import net.revelc.code.formatter.ConfigurationSource;
+import net.revelc.code.formatter.Formatter;
+import net.revelc.code.formatter.LineEnding;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
@@ -27,17 +34,14 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.TextEdit;
 
-import net.revelc.code.formatter.AbstractCacheableFormatter;
-import net.revelc.code.formatter.ConfigurationSource;
-import net.revelc.code.formatter.Formatter;
-import net.revelc.code.formatter.LineEnding;
-
 public class JavaFormatter extends AbstractCacheableFormatter implements Formatter {
 
     private CodeFormatter formatter;
 
+    private List<String> importOrder;
+
     @Override
-    public void init(Map<String, String> options, ConfigurationSource cfg) {
+    public void init(final Map<String, String> options, final ConfigurationSource cfg) {
         if (options.isEmpty()) {
             options.put(JavaCore.COMPILER_SOURCE, cfg.getCompilerSources());
             options.put(JavaCore.COMPILER_COMPLIANCE, cfg.getCompilerCompliance());
@@ -50,7 +54,7 @@ public class JavaFormatter extends AbstractCacheableFormatter implements Formatt
     }
 
     @Override
-    public String doFormat(String code, LineEnding ending) throws IOException, BadLocationException {
+    public String doFormat(final String code, final LineEnding ending) throws IOException, BadLocationException {
         TextEdit te;
         try {
             te = this.formatter.format(CodeFormatter.K_COMPILATION_UNIT, code, 0, code.length(), 0, ending.getChars());
@@ -59,14 +63,14 @@ public class JavaFormatter extends AbstractCacheableFormatter implements Formatt
                         "Code cannot be formatted. Possible cause is unmatched source/target/compliance version.");
                 return null;
             }
-        } catch (IndexOutOfBoundsException e) {
+        } catch (final IndexOutOfBoundsException e) {
             this.log.debug("Code cannot be formatted for text -->" + code + "<--", e);
             return null;
         }
 
-        IDocument doc = new Document(code);
+        final IDocument doc = new Document(code);
         te.apply(doc);
-        String formattedCode = doc.get();
+        final String formattedCode = new ImportSorter(importOrder).format(doc.get());
 
         if (code.equals(formattedCode)) {
             return null;
@@ -79,4 +83,7 @@ public class JavaFormatter extends AbstractCacheableFormatter implements Formatt
         return formatter != null;
     }
 
+    public void setImportOrder(final List<String> importOrder) {
+        this.importOrder = importOrder;
+    }
 }

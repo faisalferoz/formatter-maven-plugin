@@ -14,28 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.revelc.code.formatter;
+package net.revelc.code.formatter.java;
 
-import java.io.File;
-import java.nio.charset.Charset;
-
-import org.apache.maven.plugin.logging.Log;
-
-/**
- * @author marvin.froeder
- */
-public interface ConfigurationSource {
-
-    Log getLog();
-
-    String getCompilerSources();
-
-    String getCompilerCompliance();
-
-    String getCompilerCodegenTargetPlatform();
-
-    File getTargetDirectory();
-
-    Charset getEncoding();
+public class ImportOrder {
 
 }

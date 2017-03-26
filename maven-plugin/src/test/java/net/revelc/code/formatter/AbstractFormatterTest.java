@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.revelc.code.formatter;
 
 import java.io.File;
@@ -23,15 +24,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.revelc.code.formatter.ConfigurationSource;
-import net.revelc.code.formatter.Formatter;
-import net.revelc.code.formatter.LineEnding;
-import net.revelc.code.formatter.Result;
+import net.revelc.code.formatter.java.JavaFormatter;
 
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Assert;
 
+import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
@@ -86,6 +85,9 @@ public abstract class AbstractFormatterTest {
         final File targetDir = new File("target/testoutput");
         targetDir.mkdirs();
         formatter.init(options, new TestConfigurationSource(targetDir));
+        if (formatter instanceof JavaFormatter) {
+            ((JavaFormatter) formatter).setImportOrder(Lists.newArrayList("java", "javax", "org", "com"));
+        }
         Result result = formatter.formatFile(sourceFile, LineEnding.CRLF, false);
         Assert.assertEquals(Result.SUCCESS, result);
 
@@ -98,5 +100,4 @@ public abstract class AbstractFormatterTest {
 
         Assert.assertEquals(expectedSha512, sb.toString());
     }
-
 }
